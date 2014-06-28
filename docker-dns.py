@@ -92,7 +92,7 @@ def main():
     Run the server.
     """
     factory = server.DNSServerFactory(
-        clients=[DockerResolver(), client.Resolver(resolv='/etc/resolv.conf')]
+        clients=[DockerResolver()]
     )
 
     protocol = dns.DNSDatagramProtocol(controller=factory)
