@@ -84,7 +84,7 @@ class DockerResolver(object):
             return defer.succeed(self._nsQuery(query))
         else:
             print "Got unknown query of type %s for %s" % (query.type, query.name)
-            return defer.fail(error.DomainError())
+            return defer.fail(error.AuthoritativeDomainError())
 
 
 def main():
