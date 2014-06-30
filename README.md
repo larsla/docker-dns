@@ -15,3 +15,6 @@ Tell docker-dns how to connect to docker.
 === INTERFACE ===  
 Default: eth0  
 Which interface we will use the IP of when responding to NS queries.  
+
+=== DOMAIN ===
+Default: the search field in /etc/resolv.conf

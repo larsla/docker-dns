@@ -19,6 +19,16 @@ def get_ip_address(ifname):
     )[20:24])
 
 
+def parse_resolvconf(key):
+    with open('/etc/resolv.conf', 'r') as f:
+        for line in f.readlines():
+            parts = line.replace('\n', '').split(' ')
+            if len(parts) > 1:
+                if parts[0] == key:
+                    return ' '.join(parts[1:])
+    return False
+
+
 class DockerResolver(object):
 
     def __init__(self):
@@ -31,6 +41,12 @@ class DockerResolver(object):
         if 'INTERFACE' in os.environ:
             self.interface = os.environ['INTERFACE']
 
+        self.domain = parse_resolvconf('search')
+        if 'DOMAIN' in os.environ['DOMAIN']:
+            self.domain = os.environ['DOMAIN']
+        if not self.domain:
+            self.domain = ''
+
         self.docker = docker.Client(base_url=self.base_url,
                                     version='1.6',
                                     timeout=10)
@@ -38,15 +54,20 @@ class DockerResolver(object):
     def _dockerQuery(self, query):
         name = query.name.name
 
+        address = False
+
+        # give our own IP if someone just asked for the domain
+        if name == self.domain:
+            address = get_ip_address(self.interface)
+
         parts = name.split('.')
         host = parts[0]
 
-        address = False
-
-        for container in self.docker.containers():
-            data = self.docker.inspect_container(container['Id'])
-            if data['Config']['Hostname'] == host:
-                address = data['NetworkSettings']['IPAddress']
+        if not address:
+            for container in self.docker.containers():
+                data = self.docker.inspect_container(container['Id'])
+                if data['Config']['Hostname'] == host:
+                    address = data['NetworkSettings']['IPAddress']
 
         if not address:
             return False
