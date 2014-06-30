@@ -42,7 +42,7 @@ class DockerResolver(object):
             self.interface = os.environ['INTERFACE']
 
         self.domain = parse_resolvconf('search')
-        if 'DOMAIN' in os.environ['DOMAIN']:
+        if 'DOMAIN' in os.environ:
             self.domain = os.environ['DOMAIN']
         if not self.domain:
             self.domain = ''
